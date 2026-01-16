@@ -226,20 +226,24 @@ class RobustHTTPClient {
     }
   }
 
-  private handleError(error: any): APIError {
-    if (error.name === 'AbortError') {
-      return new APIError(APIErrorType.TIMEOUT_ERROR, 'API 요청 시간이 초과되었습니다.');
-    }
-    
+  private handleError(error: unknown): APIError {
     if (error instanceof APIError) {
       return error;
     }
     
-    if (error.name === 'TypeError' && error.message.includes('fetch')) {
-      return new APIError(APIErrorType.NETWORK_ERROR, '네트워크 연결을 확인해주세요.');
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') {
+        return new APIError(APIErrorType.TIMEOUT_ERROR, 'API 요청 시간이 초과되었습니다.');
+      }
+      
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        return new APIError(APIErrorType.NETWORK_ERROR, '네트워크 연결을 확인해주세요.');
+      }
+      
+      return new APIError(APIErrorType.UNKNOWN_ERROR, error.message || '알 수 없는 오류가 발생했습니다.');
     }
     
-    return new APIError(APIErrorType.UNKNOWN_ERROR, error.message || '알 수 없는 오류가 발생했습니다.');
+    return new APIError(APIErrorType.UNKNOWN_ERROR, '알 수 없는 오류가 발생했습니다.');
   }
 
   private sleep(ms: number): Promise<void> {
@@ -273,7 +277,7 @@ class ResponseParser {
       
       return JSON.parse(content);
       
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof APIError) {
         throw error;
       }
@@ -282,7 +286,13 @@ class ResponseParser {
         throw new APIError(APIErrorType.PARSE_ERROR, 'OpenAI API 응답을 파싱할 수 없습니다.');
       }
       
-      throw new APIError(APIErrorType.UNKNOWN_ERROR, `응답 처리 중 오류: ${error.message}`);
+      // 타입 가드를 사용한 안전한 메시지 추출 (SOLID 원칙 준수)
+      const errorMessage = 
+        error instanceof Error ? error.message :
+        typeof error === 'string' ? error :
+        '알 수 없는 오류';
+      
+      throw new APIError(APIErrorType.UNKNOWN_ERROR, `응답 처리 중 오류: ${errorMessage}`);
     }
   }
 }
