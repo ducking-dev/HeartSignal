@@ -8,7 +8,8 @@ import type { UserState, UserActions } from '@/store/user/types';
  * SOLID 원칙: Single Responsibility Principle
  */
 export class InstanceTracker<T extends object> {
-  private static instances = new Map<string, InstanceTracker<any>>();
+  // SOLID 원칙: 제네릭 타입 사용으로 타입 안전성 보장
+  private static instances = new Map<string, InstanceTracker<object>>();
   private trackedInstances = new WeakSet<T>();
   
   private constructor(private key: string) {}

@@ -14,8 +14,9 @@ import type { STTController } from '@/domain/adapters/stt.webspeech';
 
 /**
  * 리소스 관리 인터페이스 (Single Responsibility Principle)
+ * SOLID 원칙: Interface Segregation Principle - 명확한 인터페이스 정의
  */
-interface ResourceManager {
+interface ManagedResource {
   cleanup(): void;
   isActive(): boolean;
 }
@@ -23,7 +24,7 @@ interface ResourceManager {
 /**
  * 타이머 관리 클래스 (Single Responsibility Principle)
  */
-class SessionTimer implements ResourceManager {
+class SessionTimer implements ManagedResource {
   private timerId: NodeJS.Timeout | null = null;
   private startTime: number | null = null;
   private onUpdate: (duration: number) => void;
@@ -62,7 +63,7 @@ class SessionTimer implements ResourceManager {
 /**
  * 오디오 레코더 래퍼 (Adapter Pattern)
  */
-class SafeAudioRecorder implements ResourceManager {
+class SafeAudioRecorder implements ManagedResource {
   private recorder: AudioRecorder | null = null;
 
   async start(): Promise<void> {
@@ -103,7 +104,7 @@ class SafeAudioRecorder implements ResourceManager {
 /**
  * STT 컨트롤러 래퍼 (Adapter Pattern)
  */
-class SafeSTTController implements ResourceManager {
+class SafeSTTController implements ManagedResource {
   private controller: STTController | null = null;
   private adapter: WebSpeechSTTAdapter;
 
@@ -141,9 +142,10 @@ class SafeSTTController implements ResourceManager {
 
 /**
  * 리소스 관리자 (Composite Pattern)
+ * SOLID 원칙: Composite Pattern으로 여러 리소스를 하나로 관리
  */
-class ResourceManagerComposite implements ResourceManager {
-  private resources: ResourceManager[] = [];
+class ResourceManagerComposite implements ManagedResource {
+  private resources: ManagedResource[] = [];
 
   add(resource: ResourceManager): void {
     this.resources.push(resource);
@@ -380,8 +382,13 @@ export function useAnalysisControllerV6() {
 
 /**
  * AI 분석 수행 v6.0 - 강화된 에러 핸들링 (Single Responsibility Principle)
+ * SOLID 원칙: Dependency Inversion Principle - 구체적 타입이 아닌 인터페이스에 의존
  */
-async function performAIAnalysisV6(store: any, analysisActions: any, signal?: AbortSignal): Promise<void> {
+async function performAIAnalysisV6(
+  store: { segments: any[]; prosody: any[] },
+  analysisActions: { setEmotion: (emotion: any) => void; setConversation: (conversation: any) => void; setMatch: (match: any) => void; setFeedback: (feedback: any) => void },
+  signal?: AbortSignal
+): Promise<void> {
   const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
   if (!apiKey) {
     throw new Error('OpenAI API 키가 설정되지 않았습니다.');

@@ -20,13 +20,13 @@ export interface ManagedResource {
 class ResourceManager {
   private resources = new Map<string, ManagedResource>();
   private cleanupPromises = new Set<Promise<void>>();
-  private isDestroyed = false;
+  private _isDestroyed = false; // SOLID 원칙: 속성과 메서드 이름 충돌 방지
 
   /**
    * 리소스 등록
    */
   register(resource: ManagedResource): void {
-    if (this.isDestroyed) {
+    if (this._isDestroyed) {
       console.warn(`ResourceManager가 이미 파괴된 상태에서 리소스 등록 시도: ${resource.id}`);
       return;
     }
@@ -66,9 +66,9 @@ class ResourceManager {
    * 모든 리소스 해제
    */
   async cleanup(): Promise<void> {
-    if (this.isDestroyed) return;
+    if (this._isDestroyed) return;
 
-    this.isDestroyed = true;
+    this._isDestroyed = true;
     const resourceIds = Array.from(this.resources.keys());
     
     console.log(`${resourceIds.length}개 리소스 정리 시작...`);
@@ -111,9 +111,10 @@ class ResourceManager {
 
   /**
    * 파괴 상태 확인
+   * SOLID 원칙: Liskov Substitution Principle - 외부 인터페이스 유지
    */
   isDestroyed(): boolean {
-    return this.isDestroyed;
+    return this._isDestroyed;
   }
 }
 
