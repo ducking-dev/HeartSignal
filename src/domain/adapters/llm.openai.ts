@@ -142,8 +142,8 @@ ${transcript}
 
       return JSON.parse(content);
 
-    } catch (error: any) {
-      if (error.name === 'SyntaxError') {
+    } catch (error: unknown) {
+      if (error instanceof SyntaxError) {
         throw new Error('OpenAI API 응답을 파싱할 수 없습니다.');
       }
       throw error;

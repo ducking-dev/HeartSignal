@@ -88,7 +88,7 @@ class SafeAudioRecorder implements ResourceManager {
     if (this.recorder) {
       try {
         this.recorder.stop();
-      } catch (error) {
+      } catch (error: unknown) {
         console.warn('레코더 정리 중 오류:', error);
       }
       this.recorder = null;
@@ -153,7 +153,7 @@ class ResourceManagerComposite implements ResourceManager {
     this.resources.forEach(resource => {
       try {
         resource.cleanup();
-      } catch (error) {
+      } catch (error: unknown) {
         console.warn('리소스 정리 중 오류:', error);
       }
     });
@@ -238,9 +238,13 @@ export function useAnalysisControllerV6() {
       });
 
       console.log('세션 시작 완료');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('세션 시작 실패:', error);
-      sessionActions.setError(error.message || '세션을 시작할 수 없습니다.');
+      const errorMessage = 
+        error instanceof Error ? error.message :
+        typeof error === 'string' ? error :
+        '세션을 시작할 수 없습니다.';
+      sessionActions.setError(errorMessage);
       
       // 에러 발생 시 모든 리소스 정리
       sessionTimer.stop();
@@ -282,8 +286,8 @@ export function useAnalysisControllerV6() {
         await performAIAnalysisV6(store, analysisActions, controller.signal);
         sessionActions.setPhase('done');
         console.log('분석 완료');
-      } catch (apiError: any) {
-        if (apiError.name === 'AbortError') {
+      } catch (apiError: unknown) {
+        if (apiError instanceof Error && apiError.name === 'AbortError') {
           console.log('분석이 취소되었습니다.');
           return;
         }
@@ -293,9 +297,13 @@ export function useAnalysisControllerV6() {
         sessionActions.setPhase('done');
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('분석 중 오류:', error);
-      sessionActions.setError(error.message || '분석 중 오류가 발생했습니다.');
+      const errorMessage = 
+        error instanceof Error ? error.message :
+        typeof error === 'string' ? error :
+        '분석 중 오류가 발생했습니다.';
+      sessionActions.setError(errorMessage);
     }
   }, [sessionActions, audioActions, analysisActions, store, sessionTimer, unregisterResource, getAbortController]);
 
@@ -427,8 +435,8 @@ async function performAIAnalysisV6(store: any, analysisActions: any, signal?: Ab
     analysisActions.setFeedback(feedbackResult);
 
     console.log('✅ AI 분석 완료');
-  } catch (error: any) {
-    if (error.message === 'AbortError') {
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === 'AbortError') {
       console.log('🚫 AI 분석 취소됨');
       throw error;
     }

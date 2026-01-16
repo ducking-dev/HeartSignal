@@ -81,7 +81,7 @@ export function useAnalysisController() {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         stream.getTracks().forEach(track => track.stop()); // 권한 체크 후 즉시 해제
         console.log('마이크 권한 확인됨');
-      } catch (permissionError: any) {
+      } catch (permissionError: unknown) {
         console.error('마이크 권한 오류:', permissionError);
         throw new Error('마이크 사용 권한이 필요합니다. 브라우저 설정에서 마이크 권한을 허용해주세요.');
       }
@@ -131,16 +131,20 @@ export function useAnalysisController() {
 
       console.log('세션 시작 완료');
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('세션 시작 실패:', error);
-      store.setError(error.message || '알 수 없는 오류가 발생했습니다.');
+      const errorMessage = 
+        error instanceof Error ? error.message :
+        typeof error === 'string' ? error :
+        '알 수 없는 오류가 발생했습니다.';
+      store.setError(errorMessage);
       store.setPhase('error');
       
       // 리소스 정리
       if (recorderRef.current) {
         try {
           await recorderRef.current.stop();
-        } catch (cleanupError) {
+        } catch (cleanupError: unknown) {
           console.error('녹음기 정리 실패:', cleanupError);
         }
       }
@@ -148,7 +152,7 @@ export function useAnalysisController() {
       if (sttControlRef.current) {
         try {
           sttControlRef.current.stop();
-        } catch (cleanupError) {
+        } catch (cleanupError: unknown) {
           console.error('STT 정리 실패:', cleanupError);
         }
       }
@@ -169,7 +173,7 @@ export function useAnalysisController() {
           audioBlob = await recorderRef.current.stop();
           store.setAudioBlob(audioBlob);
           console.log('녹음 중지 완료, 블롭 크기:', audioBlob.size);
-        } catch (stopError) {
+        } catch (stopError: unknown) {
           console.error('녹음 중지 실패:', stopError);
           throw new Error(`녹음 중지에 실패했습니다: ${stopError instanceof Error ? stopError.message : String(stopError)}`);
         }
@@ -180,7 +184,7 @@ export function useAnalysisController() {
         try {
           sttControlRef.current.stop();
           console.log('STT 중지 완료');
-        } catch (sttStopError) {
+        } catch (sttStopError: unknown) {
           console.error('STT 중지 실패:', sttStopError);
           // STT 중지 실패는 치명적이지 않으므로 계속 진행
         }
@@ -264,16 +268,20 @@ export function useAnalysisController() {
 
         console.log('분석 완료');
 
-      } catch (apiError) {
+      } catch (apiError: unknown) {
         console.error('OpenAI API error:', apiError);
         // API 실패 시 데모 데이터로 대체
         console.log('API 실패, 데모 데이터로 대체');
         await simulateAnalysis(store);
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Analysis error:', error);
-      store.setError(error.message || '분석 중 오류가 발생했습니다.');
+      const errorMessage = 
+        error instanceof Error ? error.message :
+        typeof error === 'string' ? error :
+        '분석 중 오류가 발생했습니다.';
+      store.setError(errorMessage);
       store.setPhase('error');
     }
   }, [store]);
@@ -286,7 +294,7 @@ export function useAnalysisController() {
       try {
         sttControlRef.current.stop();
         console.log('STT 중지됨');
-      } catch (error) {
+      } catch (error: unknown) {
         console.warn('STT 중지 중 오류:', error);
       }
       sttControlRef.current = null;
@@ -296,7 +304,7 @@ export function useAnalysisController() {
       try {
         recorderRef.current.stop();
         console.log('레코더 중지됨');
-      } catch (error) {
+      } catch (error: unknown) {
         console.warn('레코더 중지 중 오류:', error);
       }
       recorderRef.current = null;

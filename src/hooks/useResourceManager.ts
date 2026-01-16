@@ -57,7 +57,7 @@ class ResourceManager {
         this.cleanupPromises.delete(cleanupResult);
       }
       console.log(`리소스 해제됨: ${id}`);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`리소스 해제 중 오류 (${id}):`, error);
     }
   }
@@ -85,7 +85,7 @@ class ResourceManager {
       }
       
       console.log('모든 리소스 정리 완료');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('리소스 정리 중 오류:', error);
     }
 

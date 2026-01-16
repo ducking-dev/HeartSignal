@@ -84,9 +84,9 @@ function ConversationDetailPageClient({ conversationId }: { conversationId: stri
           url: window.location.href,
         });
         success('대화 결과가 공유되었습니다!');
-      } catch (shareError) {
+      } catch (shareError: unknown) {
         // 사용자가 공유를 취소한 경우는 에러로 처리하지 않음
-        if ((shareError as Error).name !== 'AbortError') {
+        if (shareError instanceof Error && shareError.name !== 'AbortError') {
           error('공유 중 오류가 발생했습니다.');
         }
       }
@@ -95,7 +95,7 @@ function ConversationDetailPageClient({ conversationId }: { conversationId: stri
       try {
         await navigator.clipboard.writeText(window.location.href);
         success('링크가 클립보드에 복사되었습니다!');
-      } catch (clipboardError) {
+      } catch (clipboardError: unknown) {
         error('클립보드 복사 중 오류가 발생했습니다.');
       }
     }

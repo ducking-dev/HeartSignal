@@ -114,7 +114,7 @@ class CircuitBreaker {
       const result = await operation();
       this.onSuccess();
       return result;
-    } catch (error) {
+    } catch (error: unknown) {
       this.onFailure();
       throw error;
     }
@@ -187,7 +187,7 @@ class RobustHTTPClient {
         
         return response;
         
-      } catch (error) {
+      } catch (error: unknown) {
         lastError = this.handleError(error);
         
         if (!this.retryStrategy.shouldRetry(lastError, attempt)) {
@@ -429,7 +429,7 @@ export class OpenAIAdapterV6 implements LLMAdapter {
 
       return ResponseParser.parseJSON<T>(response);
 
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof APIError) {
         console.error(`OpenAI API 에러 [${error.type}]:`, error.message);
         throw error;
@@ -447,7 +447,7 @@ export class OpenAIAdapterV6 implements LLMAdapter {
     try {
       await this.callAPI('{"test": true}');
       return true;
-    } catch (error) {
+    } catch (error: unknown) {
       return false;
     }
   }

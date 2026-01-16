@@ -82,8 +82,12 @@ export class WebSpeechSTTAdapter implements STTAdapter {
         stop: () => this.stopRecognition(),
         isActive: () => this.isListening,
       };
-    } catch (error: any) {
-      onError(`음성 인식 초기화 실패: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = 
+        error instanceof Error ? error.message :
+        typeof error === 'string' ? error :
+        '알 수 없는 오류';
+      onError(`음성 인식 초기화 실패: ${errorMessage}`);
       return this.createDummyController();
     }
   }
@@ -140,7 +144,7 @@ export class WebSpeechSTTAdapter implements STTAdapter {
             try {
               this.recognition.start();
               console.log('음성 인식 자동 재시작');
-            } catch (error) {
+            } catch (error: unknown) {
               console.warn('음성 인식 재시작 실패:', error);
             }
           }
@@ -226,8 +230,8 @@ export class WebSpeechSTTAdapter implements STTAdapter {
     try {
       this.recognition.start();
       console.log('음성 인식 시작 요청됨');
-    } catch (error: any) {
-      if (error.name === 'InvalidStateError') {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name === 'InvalidStateError') {
         console.warn('음성 인식이 이미 시작되었습니다.');
       } else {
         console.error('음성 인식 시작 실패:', error);
@@ -249,7 +253,7 @@ export class WebSpeechSTTAdapter implements STTAdapter {
     try {
       this.recognition.stop();
       console.log('음성 인식 중지 요청됨');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('음성 인식 중지 실패:', error);
     }
   }

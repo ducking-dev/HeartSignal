@@ -60,21 +60,25 @@ export class AudioRecorder {
       this.mediaRecorder.start(100); // 100ms마다 chunk 생성
       this.isActive = true;
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       this.cleanup();
       
       // 구체적인 에러 메시지 제공
-      if (error.name === 'NotAllowedError') {
-        throw new Error('마이크 사용 권한이 거부되었습니다. 브라우저 설정에서 마이크 권한을 허용해주세요.');
-      } else if (error.name === 'NotFoundError') {
-        throw new Error('마이크를 찾을 수 없습니다. 마이크가 연결되어 있는지 확인해주세요.');
-      } else if (error.name === 'NotReadableError') {
-        throw new Error('마이크가 다른 애플리케이션에서 사용 중입니다. 다른 앱을 종료하고 다시 시도해주세요.');
-      } else if (error.name === 'OverconstrainedError') {
-        throw new Error('요청한 오디오 설정이 지원되지 않습니다.');
-      } else {
-        throw new Error(`녹음을 시작할 수 없습니다: ${error.message}`);
+      if (error instanceof Error) {
+        if (error.name === 'NotAllowedError') {
+          throw new Error('마이크 사용 권한이 거부되었습니다. 브라우저 설정에서 마이크 권한을 허용해주세요.');
+        } else if (error.name === 'NotFoundError') {
+          throw new Error('마이크를 찾을 수 없습니다. 마이크가 연결되어 있는지 확인해주세요.');
+        } else if (error.name === 'NotReadableError') {
+          throw new Error('마이크가 다른 애플리케이션에서 사용 중입니다. 다른 앱을 종료하고 다시 시도해주세요.');
+        } else if (error.name === 'OverconstrainedError') {
+          throw new Error('요청한 오디오 설정이 지원되지 않습니다.');
+        } else {
+          throw new Error(`녹음을 시작할 수 없습니다: ${error.message}`);
+        }
       }
+      
+      throw new Error('녹음을 시작할 수 없습니다: 알 수 없는 오류');
     }
   }
 
@@ -116,7 +120,7 @@ export class AudioRecorder {
       try {
         this.mediaRecorder.stop();
         this.isActive = false;
-      } catch (error) {
+      } catch (error: unknown) {
         clearTimeout(timeout);
         this.cleanup();
         reject(error);

@@ -116,7 +116,7 @@ export function registerServiceWorker() {
 
       return registration;
     })
-    .catch((error) => {
+    .catch((error: unknown) => {
       console.error('서비스 워커 등록 실패:', error);
       return null;
     });

@@ -16,7 +16,7 @@ export default function TestEnvPage() {
       await navigator.clipboard.writeText(text);
       setCopied(type);
       setTimeout(() => setCopied(null), 2000);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('클립보드 복사 실패:', error);
     }
   };

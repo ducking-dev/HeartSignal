@@ -95,7 +95,7 @@ export default function SettingsPage() {
       
       setProfile(updatedProfile);
       success('프로필이 성공적으로 업데이트되었습니다!');
-    } catch (err) {
+    } catch (err: unknown) {
       error('프로필 업데이트 중 오류가 발생했습니다.');
     }
   };

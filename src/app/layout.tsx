@@ -51,7 +51,7 @@ export default function RootLayout({
                   if (theme === 'dark') {
                     document.documentElement.classList.add('dark');
                   }
-                } catch (e) {
+                } catch (e: unknown) {
                   // localStorage 접근 실패 시 시스템 테마 사용
                   if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
                     document.documentElement.classList.add('dark');
