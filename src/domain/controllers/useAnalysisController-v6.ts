@@ -147,7 +147,7 @@ class SafeSTTController implements ManagedResource {
 class ResourceManagerComposite implements ManagedResource {
   private resources: ManagedResource[] = [];
 
-  add(resource: ResourceManager): void {
+  add(resource: ManagedResource): void {
     this.resources.push(resource);
   }
 
