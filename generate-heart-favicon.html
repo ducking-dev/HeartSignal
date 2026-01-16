@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Favicon Generator</title>
+</head>
+<body>
+    <h1>HeartSignal Favicon Generator</h1>
+    <canvas id="favicon16" width="16" height="16" style="border: 1px solid #ccc; margin: 10px;"></canvas>
+    <canvas id="favicon32" width="32" height="32" style="border: 1px solid #ccc; margin: 10px;"></canvas>
+    <canvas id="favicon48" width="48" height="48" style="border: 1px solid #ccc; margin: 10px;"></canvas>
+    
+    <div>
+        <button onclick="downloadFavicon()">Download Favicon</button>
+    </div>
+
+    <script>
+        function drawHeart(ctx, size) {
+            const centerX = size / 2;
+            const centerY = size / 2;
+            const heartSize = size * 0.6;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, size, size);
+            
+            // Set background color (HeartSignal theme)
+            ctx.fillStyle = '#E95877';
+            ctx.fillRect(0, 0, size, size);
+            
+            // Draw heart
+            ctx.fillStyle = '#FFFFFF';
+            ctx.beginPath();
+            
+            const x = centerX;
+            const y = centerY - heartSize * 0.1;
+            const width = heartSize * 0.8;
+            const height = heartSize * 0.7;
+            
+            // Heart shape using bezier curves
+            ctx.moveTo(x, y + height / 4);
+            ctx.bezierCurveTo(x, y, x - width / 2, y, x - width / 2, y + height / 4);
+            ctx.bezierCurveTo(x - width / 2, y + height / 2, x, y + height * 0.75, x, y + height);
+            ctx.bezierCurveTo(x, y + height * 0.75, x + width / 2, y + height / 2, x + width / 2, y + height / 4);
+            ctx.bezierCurveTo(x + width / 2, y, x, y, x, y + height / 4);
+            
+            ctx.fill();
+        }
+        
+        // Draw hearts on all canvases
+        const canvas16 = document.getElementById('favicon16');
+        const ctx16 = canvas16.getContext('2d');
+        drawHeart(ctx16, 16);
+        
+        const canvas32 = document.getElementById('favicon32');
+        const ctx32 = canvas32.getContext('2d');
+        drawHeart(ctx32, 32);
+        
+        const canvas48 = document.getElementById('favicon48');
+        const ctx48 = canvas48.getContext('2d');
+        drawHeart(ctx48, 48);
+        
+        function downloadFavicon() {
+            // Download 32x32 as favicon.ico (simplified)
+            const link = document.createElement('a');
+            link.download = 'favicon.png';
+            link.href = canvas32.toDataURL();
+            link.click();
+        }
+    </script>
+</body>
+</html>

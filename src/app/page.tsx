@@ -1,168 +1,339 @@
 'use client';
 
+/**
+ * HeartSignal 메인 페이지
+ * Header + Main + Footer 레이아웃을 적용한 새로운 홈페이지
+ */
+
+import React from 'react';
+import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
+import { Container } from '@/components/layout/Container';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Github, Copy, Sparkles } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import axios from 'axios';
-
-const PACKAGE_NAME = '@easynext/cli';
-const CURRENT_VERSION = 'v0.1.38';
-
-function latestVersion(packageName: string) {
-  return axios
-    .get('https://registry.npmjs.org/' + packageName + '/latest')
-    .then((res) => res.data.version);
-}
+import { SessionRecorder } from '@/components/SessionRecorder';
+import { LiveTranscriptPanel } from '@/components/LiveTranscriptPanel';
+import { ScoreGauge } from '@/components/ScoreGauge';
+import { FeedbackBubble } from '@/components/FeedbackBubble';
+import { FadeIn, FadeInOnView } from '@/components/animation/FadeIn';
+import { Stagger } from '@/components/animation/Stagger';
+import { Heart, Mic, BarChart3, MessageSquare, Sparkles, Play } from 'lucide-react';
+import { useAnalysisController } from '@/domain/controllers/useAnalysisController';
+// Phase 2: 안전한 스토어와 Mock 로더 사용
+// import { useUserStore } from '@/store/user/store';
+// import { loadMockUserData } from '@/lib/user-mock-data';
+import { useEnhancedUserStore } from '@/store/user/store-enhancer';
+import { loadMockUserDataSafely } from '@/lib/user-mock-data-safe';
+import { useSessionToHistorySync } from '@/hooks/useSessionToHistorySync';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+// Phase 2: 개발 환경 모니터링
+import { DuplicationMonitor } from '@/components/dev-tools/DuplicationMonitor';
 
 export default function Home() {
-  const { toast } = useToast();
-  const [latest, setLatest] = useState<string | null>(null);
+  const controller = useAnalysisController();
+  const router = useRouter();
+  
+  // Phase 2: Enhanced Store 사용
+  const enhancedStore = useEnhancedUserStore();
+  const { isAuthenticated } = enhancedStore;
+  
+  // v4.md 개선사항: 실제 세션 데이터와 사용자 히스토리 자동 연동
+  const { saveCurrentSessionToHistory, canSaveSession } = useSessionToHistorySync();
 
+  // Phase 2: 안전한 Mock 사용자 데이터 자동 로드
   useEffect(() => {
-    const fetchLatestVersion = async () => {
-      try {
-        const version = await latestVersion(PACKAGE_NAME);
-        setLatest(`v${version}`);
-      } catch (error) {
-        console.error('Failed to fetch version info:', error);
+    if (!isAuthenticated) {
+      const loaded = loadMockUserDataSafely(enhancedStore);
+      if (loaded && process.env.NODE_ENV === 'development') {
+        console.log('✅ Home: Mock 데이터 안전하게 로드됨');
       }
-    };
-    fetchLatestVersion();
-  }, []);
+    }
+  }, [isAuthenticated, enhancedStore]);
 
-  const handleCopyCommand = () => {
-    navigator.clipboard.writeText(`npm install -g ${PACKAGE_NAME}@latest`);
-    toast({
-      description: 'Update command copied to clipboard',
-    });
+  const handleLoadMockData = () => {
+    router.push('/mock-demo');
   };
 
-  const needsUpdate = latest && latest !== CURRENT_VERSION;
+  // v5.0 기능: 스크롤 네비게이션
+  const scrollToFeatures = () => {
+    const featuresSection = document.getElementById('features');
+    if (featuresSection) {
+      featuresSection.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+        inline: 'nearest'
+      });
+    }
+  };
+
+  // v5.0 기능: 구독 처리
+  const handleSubscribe = () => {
+    alert('구독 기능은 곧 출시될 예정입니다! 🎉');
+  };
 
   return (
-    <div className="flex min-h-screen relative overflow-hidden">
+    <div className="min-h-screen flex flex-col">
+      {/* Header */}
+      <Header showNavigation />
+      
       {/* Main Content */}
-      <div className="min-h-screen flex bg-gray-100">
-        <div className="flex flex-col p-5 md:p-8 space-y-4">
-          <h1 className="text-3xl md:text-5xl font-semibold tracking-tighter !leading-tight text-left">
-            Easiest way to start
-            <br /> Next.js project
-            <br /> with Cursor
-          </h1>
+      <main className="flex-1">
+        {/* Hero Section */}
+        <section className="py-16 md:py-24 bg-gradient-to-br from-primary-50 to-secondary-50 dark:from-primary-900/20 dark:to-secondary-900/20">
+          <Container>
+            <FadeIn className="text-center space-y-6">
+              <div className="inline-flex items-center space-x-2 bg-white/80 dark:bg-neutral-800/80 px-4 py-2 rounded-full border border-primary-200 dark:border-primary-700">
+                <Heart className="h-4 w-4 text-primary-500" />
+                <span className="text-sm font-medium text-primary-700 dark:text-primary-300">
+                  AI 기반 소개팅 분석 서비스
+                </span>
+              </div>
+              
+              <h1 className="text-4xl md:text-6xl font-bold text-neutral-900 dark:text-neutral-100">
+                감정은 <span className="text-primary-500">섬세하게</span>,<br />
+                결과는 <span className="text-secondary-500">간단하게</span>
+              </h1>
+              
+              <p className="text-lg md:text-xl text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto">
+                AI가 당신의 소개팅 대화를 실시간으로 분석하고, 
+                더 나은 연결을 위한 구체적인 피드백을 제공합니다.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Button size="lg" className="bg-primary-500 hover:bg-primary-600 text-white px-8 py-3" onClick={scrollToFeatures}>
+                  <Play className="h-5 w-5 mr-2" />
+                  지금 시작하기
+                </Button>
+                <Button variant="outline" size="lg" className="px-8 py-3" onClick={handleLoadMockData}>
+                  <Sparkles className="h-5 w-5 mr-2" />
+                  Mock 데이터 로드
+                </Button>
+              </div>
+            </FadeIn>
+          </Container>
+        </section>
 
-          <p className="text-lg text-muted-foreground">
-            Get Pro-created Next.js bootstrap just in seconds
-          </p>
+        {/* Demo Section */}
+        <section className="py-16 md:py-24">
+          <Container>
+            <FadeInOnView className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 dark:text-neutral-100 mb-4">
+                실시간 대화 분석 체험
+              </h2>
+              <p className="text-lg text-neutral-600 dark:text-neutral-400">
+                아래 버튼을 눌러 HeartSignal의 분석 기능을 직접 체험해보세요
+              </p>
+            </FadeInOnView>
 
-          <div className="flex items-center gap-2">
-            <Button
-              asChild
-              size="lg"
-              variant="secondary"
-              className="gap-2 w-fit rounded-full px-4 py-2 border border-black"
-            >
-              <a href="https://github.com/easynextjs/easynext" target="_blank">
-                <Github className="w-4 h-4" />
-                GitHub
-              </a>
-            </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="secondary"
-              className="gap-2 w-fit rounded-full px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white"
-            >
-              <a href="https://easynext.org/premium" target="_blank">
-                <Sparkles className="w-4 h-4" />
-                Premium
-              </a>
-            </Button>
-          </div>
-          <Section />
-        </div>
-      </div>
+            <div className="grid lg:grid-cols-2 gap-8 items-start">
+              {/* 왼쪽: 녹음 및 전사 */}
+              <div className="space-y-6">
+                <Card variant="elevated" padding="lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Mic className="h-5 w-5 text-primary-500" />
+                      <span>대화 녹음</span>
+                    </CardTitle>
+                    <CardDescription>
+                      자연스럽게 대화해보세요. AI가 실시간으로 분석합니다.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <SessionRecorder
+                      phase={controller.phase}
+                      duration={controller.duration}
+                      currentRMS={0}
+                      onStart={controller.startSession}
+                      onStop={controller.stopAndAnalyze}
+                      onReset={controller.resetSession}
+                      error={controller.error}
+                    />
+                  </CardContent>
+                </Card>
 
-      <div className="min-h-screen ml-16 flex-1 flex flex-col items-center justify-center space-y-4">
-        <div className="flex flex-col items-center space-y-2">
-          <p className="text-muted-foreground">
-            Current Version: {CURRENT_VERSION}
-          </p>
-          <p className="text-muted-foreground">
-            Latest Version:{' '}
-            <span className="font-bold">{latest || 'Loading...'}</span>
-          </p>
-        </div>
+                <Card variant="elevated" padding="lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <MessageSquare className="h-5 w-5 text-secondary-500" />
+                      <span>실시간 전사</span>
+                    </CardTitle>
+                    <CardDescription>
+                      대화 내용이 실시간으로 텍스트로 변환됩니다.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <LiveTranscriptPanel
+                      segments={controller.segments}
+                      isRealtime={controller.isRecording}
+                    />
+                  </CardContent>
+                </Card>
+              </div>
 
-        {needsUpdate && (
-          <div className="flex flex-col items-center space-y-2">
-            <p className="text-yellow-600">New version available!</p>
-            <p className="text-sm text-muted-foreground">
-              Copy and run the command below to update:
-            </p>
-            <div className="relative group">
-              <pre className="bg-gray-100 p-4 rounded-lg">
-                npm install -g {PACKAGE_NAME}@latest
-              </pre>
-              <button
-                onClick={handleCopyCommand}
-                className="absolute top-2 right-2 p-2 opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <Copy className="w-4 h-4" />
-              </button>
+              {/* 오른쪽: 분석 결과 */}
+              <div className="space-y-6">
+                {controller.match && (
+                  <Card variant="elevated" padding="lg">
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-2">
+                        <BarChart3 className="h-5 w-5 text-primary-500" />
+                        <span>매칭 점수</span>
+                      </CardTitle>
+                      <CardDescription>
+                        대화의 전반적인 호감도와 매칭 가능성을 분석합니다.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ScoreGauge
+                        score={controller.match.score}
+                        breakdown={controller.match.breakdown}
+                        animated={true}
+                      />
+                    </CardContent>
+                  </Card>
+                )}
+
+                {controller.feedback && (
+                  <Card variant="ghost" padding="none">
+                    <CardContent>
+                      <FeedbackBubble
+                        feedback={controller.feedback}
+                        showTyping={false}
+                      />
+                    </CardContent>
+                  </Card>
+                )}
+
+                {!controller.match && !controller.feedback && (
+                  <Card variant="outlined" padding="lg">
+                    <CardContent className="text-center py-12">
+                      <Sparkles className="h-12 w-12 text-neutral-400 mx-auto mb-4" />
+                      <p className="text-neutral-600 dark:text-neutral-400">
+                        대화를 시작하면 AI 분석 결과가 여기에 표시됩니다
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          </Container>
+        </section>
+
+        {/* Features Section */}
+        <section id="features" className="py-16 md:py-24 bg-neutral-50 dark:bg-neutral-900/50">
+          <Container>
+            <FadeInOnView className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 dark:text-neutral-100 mb-4">
+                HeartSignal의 특별한 기능들
+              </h2>
+              <p className="text-lg text-neutral-600 dark:text-neutral-400">
+                AI 기술로 더 나은 소개팅 경험을 만들어드립니다
+              </p>
+            </FadeInOnView>
+
+            <Stagger className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                {
+                  icon: Heart,
+                  title: '감정 분석',
+                  description: '대화 중 나타나는 감정 상태를 실시간으로 분석하여 상대방의 관심도를 파악합니다.',
+                  badge: '실시간',
+                },
+                {
+                  icon: MessageSquare,
+                  title: '대화 균형 측정',
+                  description: '대화의 균형도와 상호작용 품질을 측정하여 더 나은 소통을 도와드립니다.',
+                  badge: '균형도',
+                },
+                {
+                  icon: BarChart3,
+                  title: '매칭 점수',
+                  description: '종합적인 분석을 통해 0-100점 매칭 점수와 구체적인 개선 방향을 제시합니다.',
+                  badge: '점수화',
+                },
+                {
+                  icon: Sparkles,
+                  title: '개인화된 피드백',
+                  description: '당신만의 대화 스타일을 분석하여 맞춤형 개선 방안을 제공합니다.',
+                  badge: '맞춤형',
+                },
+                {
+                  icon: Mic,
+                  title: '음성 분석',
+                  description: '목소리 톤, 속도, 감정 등을 종합적으로 분석하여 더 깊이 있는 인사이트를 제공합니다.',
+                  badge: '음성인식',
+                },
+                {
+                  icon: Heart,
+                  title: '라포 형성도',
+                  description: '상대방과의 유대감과 호감도 형성 과정을 추적하고 분석합니다.',
+                  badge: '관계분석',
+                },
+              ].map((feature, index) => (
+                <Card key={index} variant="elevated" padding="lg" className="text-center">
+                  <CardHeader>
+                    <div className="inline-flex items-center justify-center w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-full mb-4">
+                      <feature.icon className="h-6 w-6 text-primary-500" />
+                    </div>
+                    <div className="flex items-center justify-center space-x-2 mb-2">
+                      <CardTitle className="text-lg">{feature.title}</CardTitle>
+                      <Badge variant="outline" size="sm">
+                        {feature.badge}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="text-left">
+                      {feature.description}
+                    </CardDescription>
+                  </CardContent>
+                </Card>
+              ))}
+            </Stagger>
+          </Container>
+        </section>
+
+        {/* Subscription CTA Section */}
+        <section className="py-12 md:py-16 bg-gradient-to-r from-primary-50 to-secondary-50 dark:from-primary-900/30 dark:to-secondary-900/30">
+          <Container>
+            <div className="text-center space-y-6">
+              <h3 className="text-2xl md:text-3xl font-bold text-neutral-900 dark:text-neutral-100">
+                더 나은 소개팅을 시작해보세요
+              </h3>
+              <p className="text-lg text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto">
+                HeartSignal과 함께 성공적인 만남을 경험하고, 
+                당신만의 연애 스토리를 만들어보세요.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Button 
+                  size="lg" 
+                  className="bg-primary-500 hover:bg-primary-600 text-white px-8 py-3"
+                  onClick={handleSubscribe}
+                >
+                  <Heart className="h-5 w-5 mr-2" />
+                  구독하기
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="px-8 py-3"
+                  onClick={() => router.push('/mypage')}
+                >
+                  마이페이지 보기
+                </Button>
+              </div>
+            </div>
+          </Container>
+        </section>
+      </main>
+
+      {/* Footer */}
+      <Footer />
+      
+      {/* Phase 2: 개발 환경 중복 데이터 모니터 */}
+      <DuplicationMonitor />
     </div>
-  );
-}
-
-function Section() {
-  const items = [
-    { href: 'https://nextjs.org/', label: 'Next.js' },
-    { href: 'https://ui.shadcn.com/', label: 'shadcn/ui' },
-    { href: 'https://tailwindcss.com/', label: 'Tailwind CSS' },
-    { href: 'https://www.framer.com/motion/', label: 'framer-motion' },
-    { href: 'https://zod.dev/', label: 'zod' },
-    { href: 'https://date-fns.org/', label: 'date-fns' },
-    { href: 'https://ts-pattern.dev/', label: 'ts-pattern' },
-    { href: 'https://es-toolkit.dev/', label: 'es-toolkit' },
-    { href: 'https://zustand.docs.pmnd.rs/', label: 'zustand' },
-    { href: 'https://supabase.com/', label: 'supabase' },
-    { href: 'https://react-hook-form.com/', label: 'react-hook-form' },
-  ];
-
-  return (
-    <div className="flex flex-col py-5 md:py-8 space-y-2 opacity-75">
-      <p className="font-semibold">What&apos;s Included</p>
-
-      <div className="flex flex-col space-y-1 text-muted-foreground">
-        {items.map((item) => (
-          <SectionItem key={item.href} href={item.href}>
-            {item.label}
-          </SectionItem>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function SectionItem({
-  children,
-  href,
-}: {
-  children: React.ReactNode;
-  href: string;
-}) {
-  return (
-    <a
-      href={href}
-      className="flex items-center gap-2 underline"
-      target="_blank"
-    >
-      <CheckCircle className="w-4 h-4" />
-      <p>{children}</p>
-    </a>
   );
 }

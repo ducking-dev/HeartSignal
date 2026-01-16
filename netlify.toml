@@ -1,0 +1,53 @@
+# Netlify 배포 설정 파일
+# HeartSignal v6.0
+
+[build]
+  # 빌드 명령어
+  command = "npm run build"
+  
+  # Next.js는 Netlify 플러그인이 자동으로 처리하므로 publish 디렉토리 불필요
+
+[build.environment]
+  # Node.js 버전
+  NODE_VERSION = "20"
+  
+  # Next.js 빌드 최적화
+  NEXT_TELEMETRY_DISABLED = "1"
+  
+  # Next.js 15 최적화
+  NEXT_PRIVATE_STANDALONE = "true"
+
+# Next.js 플러그인 (자동 감지되지만 명시적으로 설정)
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# 리다이렉트 규칙 (SPA 라우팅 지원)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# 헤더 설정 (보안 및 성능)
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+# 정적 파일 캐싱
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# 이미지 최적화
+[[headers]]
+  for = "/image/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+# 환경 변수 (보안을 위해 Netlify 대시보드에서 설정)
+# NEXT_PUBLIC_OPENAI_API_KEY는 Netlify 대시보드에서 설정해야 합니다
