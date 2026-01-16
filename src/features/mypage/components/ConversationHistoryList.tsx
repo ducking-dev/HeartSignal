@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -109,11 +110,12 @@ function ConversationCard({ conversation, onViewDetails }: ConversationCardProps
 }
 
 export function ConversationHistoryList() {
+  const router = useRouter();
   const { conversations } = useUserStore();
 
   const handleViewDetails = (conversation: ConversationHistory) => {
     // v4.md 개선사항: 대화 상세 보기 페이지로 이동
-    window.location.href = `/conversation/${conversation.id}`;
+    router.push(`/conversation/${conversation.id}`);
   };
 
   if (conversations.length === 0) {
@@ -129,7 +131,7 @@ export function ConversationHistoryList() {
           <div className="text-center py-8">
             <MessageCircle className="h-12 w-12 text-neutral-300 dark:text-neutral-600 mx-auto mb-4" />
             <p className="text-neutral-500 mb-4">아직 대화 기록이 없어요</p>
-            <Button variant="outline" onClick={() => window.location.href = '/'}>
+            <Button variant="outline" onClick={() => router.push('/')}>
               첫 대화 시작하기
             </Button>
           </div>

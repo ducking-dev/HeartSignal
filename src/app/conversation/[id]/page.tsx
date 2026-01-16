@@ -7,7 +7,7 @@ import { Container } from '@/components/layout/Container';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useUserStore } from '@/store/user/store';
+import { useEnhancedUserStore } from '@/store/user/store-enhancer';
 import { useToastHelpers } from '@/components/ui/enhanced/ToastSystem';
 import { ArrowLeft, Share2, Calendar, Clock, TrendingUp, MessageSquare, Heart } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
@@ -37,7 +37,7 @@ export default async function ConversationDetailPage({ params }: ConversationDet
  */
 function ConversationDetailPageClient({ conversationId }: { conversationId: string }) {
   const router = useRouter();
-  const { conversations } = useUserStore();
+  const { conversations } = useEnhancedUserStore();
   const { success, error } = useToastHelpers();
   
   const conversation = conversations.find(conv => conv.id === conversationId);

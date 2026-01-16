@@ -12,6 +12,7 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { AnimatedButton } from '@/components/ui/enhanced/AnimatedButton';
 import { Container } from './Container';
 import { useUserStore } from '@/store/user/store';
+import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
 export interface HeaderProps {
@@ -31,6 +32,7 @@ export function Header({
   className,
   sticky = true,
 }: HeaderProps) {
+  const router = useRouter();
   const { isAuthenticated, profile } = useUserStore();
   
   return (
@@ -100,7 +102,7 @@ export function Header({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => window.location.href = '/mypage'}
+                onClick={() => router.push('/mypage')}
                 className="h-8 w-8 p-0"
                 aria-label="마이페이지"
                 title={`${profile.name}님의 마이페이지`}

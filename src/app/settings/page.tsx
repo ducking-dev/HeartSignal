@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { useUserStore } from '@/store/user/store';
+import { useEnhancedUserStore } from '@/store/user/store-enhancer';
 import { useTheme } from '@/contexts/AppContext';
 import { useToastHelpers } from '@/components/ui/enhanced/ToastSystem';
 import { 
@@ -32,7 +32,7 @@ import {
  */
 export default function SettingsPage() {
   const router = useRouter();
-  const { profile, setProfile, logout, isAuthenticated } = useUserStore();
+  const { profile, setProfile, logout, isAuthenticated } = useEnhancedUserStore();
   const { theme, toggleTheme } = useTheme();
   const { success, error } = useToastHelpers();
 

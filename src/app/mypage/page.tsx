@@ -16,10 +16,12 @@ import { useEnhancedUserStore } from '@/store/user/store-enhancer';
 import { loadMockUserDataSafely, debugMockDataState } from '@/lib/user-mock-data-safe';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Settings } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 // Phase 2: 개발 환경 모니터링
 import { DuplicationMonitor } from '@/components/dev-tools/DuplicationMonitor';
 
 export default function MyPage() {
+  const router = useRouter();
   // Phase 2: Enhanced Store 사용 (기존 스토어와 완전 호환)
   const enhancedStore = useEnhancedUserStore();
   const { isAuthenticated, profile } = enhancedStore;
@@ -47,7 +49,7 @@ export default function MyPage() {
             <p className="text-neutral-600 dark:text-neutral-400 mb-6">
               마이페이지를 이용하려면 먼저 로그인해주세요.
             </p>
-            <Button onClick={() => window.location.href = '/'}>
+            <Button onClick={() => router.push('/')}>
               홈으로 돌아가기
             </Button>
           </div>
@@ -86,7 +88,7 @@ export default function MyPage() {
               variant="outline" 
               size="sm" 
               className="gap-2"
-              onClick={() => window.location.href = '/settings'}
+              onClick={() => router.push('/settings')}
             >
               <Settings className="h-4 w-4" />
               설정

@@ -24,9 +24,17 @@ export const useUserStore = create<UserState & UserActions>()(
 
         addConversation: (conversation: ConversationHistory) => {
           set(
-            (state) => ({
-              conversations: [conversation, ...state.conversations],
-            }),
+            (state) => {
+              // 중복 체크 추가 (TICKET-001)
+              const exists = state.conversations.some(c => c.id === conversation.id);
+              if (exists) {
+                console.warn(`중복 대화 무시: ${conversation.id}`);
+                return state; // 변경 없음
+              }
+              return {
+                conversations: [conversation, ...state.conversations],
+              };
+            },
             false,
             'addConversation'
           );
